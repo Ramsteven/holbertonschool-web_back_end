@@ -1,34 +1,48 @@
 #!/usr/bin/env python3
-"""Auth class """
+
+"""
+Template for authentication system
+"""
 
 from flask import request
-from typing import TypeVar, List
+from typing import List, TypeVar
 
 
 class Auth():
-    """Auth class to manage
-    the API authentication"""
+    """
+    Authentification methods
+    """
 
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
-        """returns False - path"""
-        if path is None or excluded_paths is None:
+        """ Returns False
+        """
+        if path is None or excluded_paths is None or not len(excluded_paths):
             return True
-        if len(excluded_paths) == 0:
-            return True
-        if path[-1:] != '/':
-            path = path + '/'
+        # Add slash to all cases for consistency
+        if path[-1] != '/':
+            path += '/'
+        if excluded_paths[-1] != '/':
+            excluded_paths += '/'
+
+        astericks = [stars[:-1]
+                     for stars in excluded_paths if stars[-1] == '*']
+
+        for stars in astericks:
+            if path.startswith(stars):
+                return False
+
         if path in excluded_paths:
             return False
         return True
 
     def authorization_header(self, request=None) -> str:
-        """returns None - request"""
-        if request is None:
-            return None
-        if not request.headers.get('Authorization'):
+        """ Flask request object
+        """
+        if request is None or 'Authorization' not in request.headers:
             return None
         return request.headers.get('Authorization')
 
     def current_user(self, request=None) -> TypeVar('User'):
-        """returns None - request"""
+        """ Flask request object
+        """
         return None
